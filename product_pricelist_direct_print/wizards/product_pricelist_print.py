@@ -39,6 +39,7 @@ class ProductPricelistPrint(models.TransientModel):
     )
     show_standard_price = fields.Boolean(string='Show Cost Price')
     show_sale_price = fields.Boolean(string='Show Sale Price')
+    hide_pricelist_name = fields.Boolean(string='Hide Pricelist Name')
     order_field = fields.Selection([
         ('name', 'Name'),
         ('default_code', 'Internal Reference'),
@@ -206,7 +207,8 @@ class ProductPricelistPrint(models.TransientModel):
         orders = partner.sale_order_ids.filtered(
             lambda r: r.state not in ['draft', 'sent', 'cancel'])
         orders = orders.sorted(key=lambda r: r.confirmation_date, reverse=True)
-        products = orders.mapped('order_line').mapped('product_id')
+        products = orders.mapped(
+            'order_line').mapped('product_id').filtered('active')
         return products[:self.last_ordered_products]
 
     @api.multi
